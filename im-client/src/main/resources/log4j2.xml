@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="0" shutdownHook="disable">
+	<Properties>
+		<Property name="APP_NAME">im-client</Property>
+		<Property name="LOG_FILE_PATH">../logs/</Property>
+		<Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} %level [%t] [%c{1.}] %maxLen{%m%notEmpty{ =>%ex{short}}}{2048}%n</Property>
+	</Properties>
+
+	<Appenders>
+		<Console name="console" target="SYSTEM_OUT">
+			<PatternLayout pattern="${LOG_PATTERN}"/>
+		</Console>
+
+		<RollingRandomAccessFile name="info"
+								 fileName="${sys:LOG_FILE_PATH}/${APP_NAME}_info.log"
+								 filePattern="${sys:LOG_FILE_PATH}/previous/${APP_NAME}_info_%d_%i.log.gz"
+								 append="true">
+			<PatternLayout pattern="${LOG_PATTERN}"/>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1"/>
+				<SizeBasedTriggeringPolicy size="200MB"/>
+			</Policies>
+			<DefaultRolloverStrategy max="20"/>
+		</RollingRandomAccessFile>
+
+		<RollingRandomAccessFile name="error"
+								 fileName="${sys:LOG_FILE_PATH}/${APP_NAME}_error.log"
+								 filePattern="${sys:LOG_FILE_PATH}/previous/${APP_NAME}_error_%d_%i.log.gz"
+								 append="true">
+			<PatternLayout pattern="${LOG_PATTERN}"/>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1"/>
+				<SizeBasedTriggeringPolicy size="200MB"/>
+			</Policies>
+			<Filters>
+				<ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+			</Filters>
+			<DefaultRolloverStrategy max="30"/>
+
+		</RollingRandomAccessFile>
+<!--		如果不使用 slkwalking 就注释掉-->
+<!--		<GRPCLogClientAppender name="grpc-log"/>-->
+
+	</Appenders>
+	<Loggers>
+<!--		异步日志-->
+		<AsyncLogger name="asyncLogger" level="info" includeLocation="true">
+			<AppenderRef ref="console"/>
+			<AppenderRef ref="info"/>
+		</AsyncLogger>
+
+		<Root level="debug">
+			<AppenderRef ref="error"/>
+			<AppenderRef ref="console"/>
+			<AppenderRef ref="info"/>
+			<!--			<AppenderRef ref="grpc-log"/>-->
+		</Root>
+<!--		mybatis 日志 按需打开-->
+<!--        <logger name="package name" level="debug" additivity="true"/>-->
+	</Loggers>
+</Configuration>
